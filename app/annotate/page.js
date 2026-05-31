@@ -184,9 +184,40 @@ export default function Annotate() {
     persist(scores, next);
   }
 
-  function persist(s, n) {
+  const projectId = useRef(null);
+
+  async function persist(s, n) {
     try {
       localStorage.setItem(storageKey.current, JSON.stringify({ scores: s, notes: n }));
+      const done = sheetData.filter((_,i) => {
+        const sc = s[i];
+        if (!sc) return false;
+        return DIMS.every(d => sc[d] !== undefined && sc[d] !== null && sc[d] !== '');
+      }).length;
+      if (user) {
+        if (!projectId.current) {
+          const { data } = await supabase.from('projects').insert({
+            user_id: user.id,
+            name: fileName,
+            file_name: fileName,
+            scores: s,
+            notes: n,
+            col_q: colQ,
+            col_s: colS,
+            col_src: colSrc,
+            total_rows: sheetData.length,
+            done_rows: done,
+          }).select().single();
+          if (data) projectId.current = data.id;
+        } else {
+          await supabase.from('projects').update({
+            scores: s,
+            notes: n,
+            done_rows: done,
+            updated_at: new Date().toISOString(),
+          }).eq('id', projectId.current);
+        }
+      }
       setSaveBadge('saved ' + new Date().toLocaleTimeString());
     } catch(e) {}
   }
