@@ -20,15 +20,17 @@ export default function Annotate() {
   const [headerRowIdx, setHeaderRowIdx] = useState(0);
   const [saveBadge, setSaveBadge] = useState('');
   const [dragOver, setDragOver] = useState(false);
+  const [projectLoading, setProjectLoading] = useState(false);
   const fileInputRef = useRef(null);
   const leftPanelRef = useRef(null);
   const questionRef = useRef(null);
   const solutionRef = useRef(null);
   const storageKey = useRef('annot_tool_v1');
+  const projectId = useRef(null);
 
   const DIMS = ['q1','q2','q3','q4','q5','q6','q7'];
 
-  // Auth check
+  // Auth check + project load
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { window.location.href = '/'; return; }
@@ -144,7 +146,7 @@ export default function Annotate() {
     return s;
   }
 
- function handleFile(file) {
+  function handleFile(file) {
     setUploadError('');
     const name = file.name.replace(/\.[^.]+$/,'');
     setFileName(name);
@@ -211,9 +213,6 @@ export default function Annotate() {
     setNotes(next);
     persist(scores, next);
   }
-
-  const projectId = useRef(null);
-  const [projectLoading, setProjectLoading] = useState(false);
 
   async function persist(s, n) {
     try {
@@ -282,7 +281,7 @@ export default function Annotate() {
     window.location.href = '/';
   }
 
-  if (!authChecked) return (
+  if (!authChecked || projectLoading) return (
     <div style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#0f1117',color:'#e2e8f8',fontFamily:'monospace',fontSize:'13px',letterSpacing:'2px'}}>
       LOADING...
     </div>
@@ -410,6 +409,7 @@ export default function Annotate() {
         .notes-field{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 11px;resize:vertical;min-height:64px;outline:none;transition:border-color .15s;line-height:1.6}
         .notes-field:focus{border-color:var(--accent)}
         .score-done-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(62,207,110,.12);border:1px solid rgba(62,207,110,.3);color:var(--green);border-radius:99px;font-family:var(--mono);font-size:10px;padding:2px 8px}
+        .reupload-banner{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.3);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--amber);text-align:center;}
         @media(max-width:780px){#split-wrap{grid-template-columns:1fr}#right-panel{position:static;height:auto;border-top:1px solid var(--border)}#left-panel{border-right:none}}
       `}</style>
 
@@ -418,6 +418,11 @@ export default function Annotate() {
           <div className="upload-logo">Annotation Studio</div>
           <h1 className="upload-title">Start Annotating</h1>
           <p className="upload-sub">Upload your spreadsheet. Headers are auto-detected. Score each row on your metrics with a single click.</p>
+          {projectId.current && (
+            <div className="reupload-banner">
+              ⚠ Re-upload your file to continue — your scores are saved and will be restored automatically.
+            </div>
+          )}
           <div className={`drop-zone${dragOver?' drag-over':''}`}
             onDragOver={e=>{e.preventDefault();setDragOver(true)}}
             onDragLeave={()=>setDragOver(false)}
