@@ -30,12 +30,37 @@ export default function Annotate() {
 
   // Auth check
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) {
-        window.location.href = '/';
-      } else {
-        setUser(data.user);
-        setAuthChecked(true);
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) { window.location.href = '/'; return; }
+      setUser(data.user);
+      setAuthChecked(true);
+      const params = new URLSearchParams(window.location.search);
+      const pid = params.get('project');
+      if (pid) {
+        projectId.current = pid;
+        setProjectLoading(true);
+        const { data: proj } = await supabase.from('projects').select('*').eq('id', pid).single();
+        if (proj) {
+          setFileName(proj.file_name || 'project');
+          setColQ(proj.col_q || '');
+          setColS(proj.col_s || '');
+          setColSrc(proj.col_src || '');
+          setScores(proj.scores || {});
+          setNotes(proj.notes || {});
+          storageKey.current = 'annot_' + pid;
+          const cached = localStorage.getItem('sheet_' + pid);
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached);
+              setSheetData(parsed.data || []);
+              setOriginalHeaders(parsed.headers || []);
+              setHeaderRowIdx(parsed.headerRowIdx || 0);
+              setMetaLines(parsed.metaLines || []);
+              setScreen('annotate');
+            } catch(e) {}
+          }
+        }
+        setProjectLoading(false);
       }
     });
   }, []);
@@ -119,7 +144,7 @@ export default function Annotate() {
     return s;
   }
 
-  function handleFile(file) {
+ function handleFile(file) {
     setUploadError('');
     const name = file.name.replace(/\.[^.]+$/,'');
     setFileName(name);
@@ -161,6 +186,9 @@ export default function Annotate() {
         setColSrc(srcGuess||'');
         const saved = localStorage.getItem(storageKey.current);
         if (saved) { try { const p = JSON.parse(saved); setScores(p.scores||{}); setNotes(p.notes||{}); } catch(e) {} }
+        localStorage.setItem('sheet_' + (projectId.current || storageKey.current), JSON.stringify({
+          data, headers, headerRowIdx: hIdx, metaLines: meta
+        }));
       } catch(err) { setUploadError('Could not read this file: '+err.message); }
     };
     reader.readAsArrayBuffer(file);
@@ -185,6 +213,7 @@ export default function Annotate() {
   }
 
   const projectId = useRef(null);
+  const [projectLoading, setProjectLoading] = useState(false);
 
   async function persist(s, n) {
     try {
