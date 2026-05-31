@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabase';
 
 // ─── Smart Label Dictionary ───────────────────────────────────────────────────
 const LABEL_DICT = {
-  // NLP / Text Quality
   fluency:        { scale: 5, labels: ['Disfluent','Mostly disfluent','Mixed','Mostly fluent','Fluent'] },
   flow:           { scale: 5, labels: ['Disfluent','Mostly disfluent','Mixed','Mostly fluent','Fluent'] },
   naturalness:    { scale: 5, labels: ['Robotic','Mostly robotic','Mixed','Mostly natural','Natural'] },
@@ -18,8 +17,6 @@ const LABEL_DICT = {
   reasoning:      { scale: 5, labels: ['No reasoning','Weak','Partial','Mostly sound','Sound'] },
   relevance:      { scale: 5, labels: ['Irrelevant','Slightly relevant','Somewhat relevant','Relevant','Highly relevant'] },
   relevant:       { scale: 5, labels: ['Irrelevant','Slightly relevant','Somewhat relevant','Relevant','Highly relevant'] },
-  pertinence:     { scale: 5, labels: ['Irrelevant','Slightly relevant','Somewhat relevant','Relevant','Highly relevant'] },
-  topicality:     { scale: 5, labels: ['Off-topic','Slightly on-topic','Somewhat on-topic','On-topic','Highly on-topic'] },
   accuracy:       { scale: 5, labels: ['Wrong','Mostly wrong','Partially correct','Mostly correct','Correct'] },
   accurate:       { scale: 5, labels: ['Wrong','Mostly wrong','Partially correct','Mostly correct','Correct'] },
   correctness:    { scale: 5, labels: ['Wrong','Mostly wrong','Partially correct','Mostly correct','Correct'] },
@@ -31,118 +28,94 @@ const LABEL_DICT = {
   coverage:       { scale: 5, labels: ['No coverage','Minimal','Partial','Good','Full coverage'] },
   grammar:        { scale: 5, labels: ['Many errors','Several errors','Some errors','Minor errors','Flawless'] },
   syntax:         { scale: 5, labels: ['Many errors','Several errors','Some errors','Minor errors','Flawless'] },
-  linguistic:     { scale: 5, labels: ['Many errors','Several errors','Some errors','Minor errors','Flawless'] },
   clarity:        { scale: 5, labels: ['Very unclear','Unclear','Neutral','Clear','Very clear'] },
-  clear:          { scale: 5, labels: ['Very unclear','Unclear','Neutral','Clear','Very clear'] },
   informativeness:{ scale: 5, labels: ['Uninformative','Slightly informative','Somewhat informative','Informative','Highly informative'] },
   informative:    { scale: 5, labels: ['Uninformative','Slightly informative','Somewhat informative','Informative','Highly informative'] },
   conciseness:    { scale: 5, labels: ['Very verbose','Verbose','Moderate','Concise','Very concise'] },
-  concise:        { scale: 5, labels: ['Very verbose','Verbose','Moderate','Concise','Very concise'] },
   creativity:     { scale: 5, labels: ['Not creative','Slightly creative','Moderately creative','Creative','Highly creative'] },
-  creative:       { scale: 5, labels: ['Not creative','Slightly creative','Moderately creative','Creative','Highly creative'] },
   diversity:      { scale: 5, labels: ['No diversity','Minimal','Moderate','Diverse','Highly diverse'] },
-  // Confidence / Certainty
   confidence:     { scale: 5, labels: ['Guessing','Leaning','Moderate','Confident','Certain'] },
-  confident:      { scale: 5, labels: ['Guessing','Leaning','Moderate','Confident','Certain'] },
   certainty:      { scale: 5, labels: ['Guessing','Leaning','Moderate','Confident','Certain'] },
-  certain:        { scale: 5, labels: ['Guessing','Leaning','Moderate','Confident','Certain'] },
-  uncertainty:    { scale: 5, labels: ['Very certain','Certain','Moderate','Uncertain','Very uncertain'] },
-  // Difficulty
   difficulty:     { scale: 5, labels: ['Very easy','Easy','Moderate','Hard','Very hard'] },
-  hardness:       { scale: 5, labels: ['Very easy','Easy','Moderate','Hard','Very hard'] },
   complexity:     { scale: 5, labels: ['Very simple','Simple','Moderate','Complex','Very complex'] },
-  complex:        { scale: 5, labels: ['Very simple','Simple','Moderate','Complex','Very complex'] },
-  // Generic Quality
   quality:        { scale: 5, labels: ['Very poor','Poor','Fair','Good','Excellent'] },
   overall:        { scale: 5, labels: ['Very poor','Poor','Fair','Good','Excellent'] },
-  general:        { scale: 5, labels: ['Very poor','Poor','Fair','Good','Excellent'] },
   performance:    { scale: 5, labels: ['Very poor','Poor','Fair','Good','Excellent'] },
-  // Sentiment / Opinion
   sentiment:      { scale: 3, labels: ['Negative','Neutral','Positive'] },
-  opinion:        { scale: 5, labels: ['Strongly negative','Negative','Neutral','Positive','Strongly positive'] },
   satisfaction:   { scale: 5, labels: ['Strongly dissatisfied','Dissatisfied','Neutral','Satisfied','Strongly satisfied'] },
   preference:     { scale: 5, labels: ['Strongly dislike','Dislike','Neutral','Like','Strongly like'] },
-  agree:          { scale: 5, labels: ['Strongly disagree','Disagree','Neutral','Agree','Strongly agree'] },
   agreement:      { scale: 5, labels: ['Strongly disagree','Disagree','Neutral','Agree','Strongly agree'] },
-  // Medical / Clinical
   severity:       { scale: 5, labels: ['None','Mild','Moderate','Severe','Very severe'] },
-  intense:        { scale: 5, labels: ['None','Mild','Moderate','Intense','Very intense'] },
   intensity:      { scale: 5, labels: ['None','Mild','Moderate','Intense','Very intense'] },
   pain:           { scale: 5, labels: ['No pain','Mild','Moderate','Severe','Unbearable'] },
   risk:           { scale: 5, labels: ['Very safe','Safe','Moderate risk','High risk','Very high risk'] },
   urgency:        { scale: 5, labels: ['Not urgent','Slightly urgent','Moderate','Urgent','Very urgent'] },
-  // Binary
   human:          { scale: 2, labels: ['Human','AI generated'] },
   llm:            { scale: 2, labels: ['Human','AI generated'] },
   generated:      { scale: 2, labels: ['Human','AI generated'] },
   appropriate:    { scale: 2, labels: ['No','Yes'] },
-  suitable:       { scale: 2, labels: ['No','Yes'] },
   valid:          { scale: 2, labels: ['Invalid','Valid'] },
-  // Translation
   translation:    { scale: 5, labels: ['Very poor','Poor','Acceptable','Good','Excellent'] },
-  adequateness:   { scale: 5, labels: ['Inadequate','Mostly inadequate','Partial','Mostly adequate','Adequate'] },
   fidelity:       { scale: 5, labels: ['Unfaithful','Mostly unfaithful','Partial','Mostly faithful','Faithful'] },
-  // Legal / Compliance
   compliance:     { scale: 3, labels: ['Non-compliant','Partial','Compliant'] },
-  legal:          { scale: 3, labels: ['Illegal','Unclear','Legal'] },
   ethical:        { scale: 3, labels: ['Unethical','Borderline','Ethical'] },
   bias:           { scale: 5, labels: ['Highly biased','Biased','Slightly biased','Mostly neutral','Neutral'] },
-  toxic:          { scale: 3, labels: ['Not toxic','Borderline','Toxic'] },
   toxicity:       { scale: 3, labels: ['Not toxic','Borderline','Toxic'] },
-  harmful:        { scale: 3, labels: ['Not harmful','Borderline','Harmful'] },
   harm:           { scale: 3, labels: ['No harm','Potential harm','Harmful'] },
 };
 
 const GENERIC_LABELS = {
-  2:  ['No','Yes'],
-  3:  ['Low','Medium','High'],
-  5:  ['Very poor','Poor','Fair','Good','Excellent'],
-  7:  ['Very low','Low','Below average','Average','Above average','High','Very high'],
-  10: ['1 - Very low','2','3','4','5 - Moderate','6','7','8','9','10 - Very high'],
+  2: ['No','Yes'],
+  3: ['Low','Medium','High'],
+  5: ['Very poor','Poor','Fair','Good','Excellent'],
+  7: ['Very low','Low','Below average','Average','Above average','High','Very high'],
+  10: ['1','2','3','4','5','6','7','8','9','10'],
 };
+
+const SKIP_NAMES = ['note','notes','comment','comments','remark','remarks','description','desc','text','feedback','observation','observations','annotation','annotations','name','id','source','origin','label','tag','category','type','class','group','split','set','batch','index','idx','row','num','number','count'];
 
 function getGenericLabels(scale) {
   if (GENERIC_LABELS[scale]) return GENERIC_LABELS[scale];
-  return Array.from({length: scale}, (_,i) => `${i+1}`);
-}
-
-function normalizeName(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g,' ').trim();
+  return Array.from({length:scale},(_,i)=>`${i+1}`);
 }
 
 function splitCamel(str) {
-  return str.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+  return str.replace(/([a-z])([A-Z])/g,'$1 $2').toLowerCase();
 }
 
 function smartTokenize(name) {
   let s = splitCamel(name);
-  s = s.replace(/[_\-./\\()[\],;:]/g, ' ');
-  s = s.replace(/[0-9]+/g, ' ');
-  s = s.toLowerCase().replace(/\s+/g,' ').trim();
-  return s.split(' ').filter(t => t.length > 1);
+  s = s.replace(/[_\-./\\()[\],;:]/g,' ').replace(/[0-9]+/g,' ').toLowerCase().replace(/\s+/g,' ').trim();
+  return s.split(' ').filter(t=>t.length>1);
 }
 
 function suggestLabels(name, scale) {
-  const normalized = normalizeName(name).replace(/\s/g,'');
+  const normalized = name.toLowerCase().replace(/[^a-z]/g,'');
   if (LABEL_DICT[normalized]) {
     const d = LABEL_DICT[normalized];
     const s = scale || d.scale;
-    return { scale: s, labels: d.labels.slice(0, s) };
+    const base = d.labels.slice(0,s);
+    while (base.length < s) base.push(`Score ${base.length+1}`);
+    return { scale: s, labels: base };
   }
   const tokens = smartTokenize(name);
   for (const token of tokens) {
     if (LABEL_DICT[token]) {
       const d = LABEL_DICT[token];
       const s = scale || d.scale;
-      return { scale: s, labels: d.labels.slice(0, s) };
+      const base = d.labels.slice(0,s);
+      while (base.length < s) base.push(`Score ${base.length+1}`);
+      return { scale: s, labels: base };
     }
   }
   for (const token of tokens) {
     for (const key of Object.keys(LABEL_DICT)) {
-      if (token.includes(key) || key.includes(token)) {
+      if (token.includes(key)||key.includes(token)) {
         const d = LABEL_DICT[key];
         const s = scale || d.scale;
-        return { scale: s, labels: d.labels.slice(0, s) };
+        const base = d.labels.slice(0,s);
+        while (base.length < s) base.push(`Score ${base.length+1}`);
+        return { scale: s, labels: base };
       }
     }
   }
@@ -151,54 +124,64 @@ function suggestLabels(name, scale) {
 }
 
 function buildLabelsForRange(start, end, existingLabels) {
-  const count = end - start + 1;
-  return Array.from({length: count}, (_,i) => ({
-    value: start + i,
-    label: existingLabels?.[i]?.label || '',
+  const count = Math.max(end - start + 1, 1);
+  return Array.from({length:count},(_,i)=>({
+    value: start+i,
+    label: existingLabels?.[i]?.label ?? existingLabels?.[i] ?? '',
   }));
 }
 
-// ─── Metric Detection ─────────────────────────────────────────────────────────
+function isSkipName(name) {
+  const tokens = smartTokenize(name);
+  const normalized = name.toLowerCase().replace(/[^a-z]/g,'');
+  if (SKIP_NAMES.includes(normalized)) return true;
+  return tokens.some(t=>SKIP_NAMES.includes(t));
+}
+
+function isTextColumn(vals) {
+  if (!vals.length) return false;
+  const textVals = vals.filter(v=>v&&String(v).length>20);
+  return textVals.length > vals.length * 0.3;
+}
+
 function detectMetrics(headers, data, displayCols) {
-  const candidates = headers.filter(h => !displayCols.includes(h));
+  const candidates = headers.filter(h=>!displayCols.includes(h));
   const results = [];
   for (const h of candidates) {
-    const vals = data.map(r => r[h]).filter(v => v !== '' && v !== null && v !== undefined);
-    const isEmpty = vals.length < data.length * 0.1;
-    const numVals = vals.map(v => parseFloat(v)).filter(v => !isNaN(v));
-    const isNumeric = numVals.length > vals.length * 0.7;
+    if (isSkipName(h)) continue;
+    const vals = data.map(r=>r[h]).filter(v=>v!==''&&v!==null&&v!==undefined);
+    if (isTextColumn(vals)) continue;
+    const isEmpty = vals.length < data.length * 0.15;
+    const numVals = vals.map(v=>parseFloat(v)).filter(v=>!isNaN(v));
+    const isNumeric = numVals.length >= vals.length * 0.7 && numVals.length > 0;
     const min = isNumeric ? Math.min(...numVals) : null;
     const max = isNumeric ? Math.max(...numVals) : null;
-    const isTightRange = isNumeric && max <= 20 && min >= -20 && (max - min) <= 20;
-    const confidence = (isEmpty ? 3 : 0) + (isTightRange ? 2 : 0) + (isNumeric ? 1 : 0);
-    if (isEmpty || isTightRange) {
-      const detectedScale = isTightRange ? Math.round(max - min + 1) : 5;
-      const detectedStart = isTightRange ? Math.round(min) : 1;
-      const detectedEnd = isTightRange ? Math.round(max) : 5;
-      const suggested = suggestLabels(h, detectedScale);
-      results.push({
-        id: Math.random().toString(36).slice(2),
-        name: h,
-        scaleType: 'preset',
-        scaleStart: detectedStart,
-        scaleEnd: detectedEnd,
-        scale: detectedScale,
-        labels: buildLabelsForRange(detectedStart, detectedEnd, suggested.labels.map(l => ({label:l}))),
-        suggested: true,
-        confidence,
-      });
+    const isTightRange = isNumeric && max <= 20 && min >= -20 && (max-min) <= 19;
+    if (!isEmpty && !isTightRange) continue;
+    let scaleStart = 1, scaleEnd = 5;
+    if (isTightRange && (max-min) >= 1) {
+      scaleStart = Math.round(min);
+      scaleEnd = Math.round(max);
     }
+    const scale = scaleEnd - scaleStart + 1;
+    const suggested = suggestLabels(h, scale);
+    results.push({
+      id: Math.random().toString(36).slice(2),
+      name: h,
+      scaleType: isTightRange ? 'preset' : 'preset',
+      scaleStart, scaleEnd, scale,
+      labels: buildLabelsForRange(scaleStart, scaleEnd, suggested.labels.map(l=>({label:l}))),
+      suggested: true,
+    });
   }
-  results.sort((a,b) => b.confidence - a.confidence);
   if (results.length === 0) {
     const suggested = suggestLabels('quality', 5);
     results.push({
       id: Math.random().toString(36).slice(2),
       name: 'Metric 1',
-      scaleType: 'preset',
-      scaleStart: 1, scaleEnd: 5, scale: 5,
-      labels: buildLabelsForRange(1, 5, suggested.labels.map(l=>({label:l}))),
-      suggested: false, confidence: 0,
+      scaleType: 'preset', scaleStart: 1, scaleEnd: 5, scale: 5,
+      labels: buildLabelsForRange(1,5,suggested.labels.map(l=>({label:l}))),
+      suggested: false,
     });
   }
   return results;
@@ -211,8 +194,7 @@ export default function Annotate() {
   const [screen, setScreen] = useState('upload');
   const [sheetData, setSheetData] = useState([]);
   const [originalHeaders, setOriginalHeaders] = useState([]);
-  const [metaLines, setMetaLines] = useState([]);
-  const [displayCols, setDisplayCols] = useState(['','']);
+  const [displayCols, setDisplayCols] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
   const [layoutMode, setLayoutMode] = useState('tabs');
@@ -226,6 +208,8 @@ export default function Annotate() {
   const [dragOver, setDragOver] = useState(false);
   const [projectLoading, setProjectLoading] = useState(false);
   const [metrics, setMetrics] = useState([]);
+  const [includeNotes, setIncludeNotes] = useState(true);
+  const [autoAdvance, setAutoAdvance] = useState(true);
   const fileInputRef = useRef(null);
   const leftPanelRef = useRef(null);
   const contentRefs = useRef([]);
@@ -233,8 +217,8 @@ export default function Annotate() {
   const projectId = useRef(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) { window.location.href = '/'; return; }
+    supabase.auth.getUser().then(async ({data}) => {
+      if (!data.user) { window.location.href='/'; return; }
       setUser(data.user);
       setAuthChecked(true);
       const params = new URLSearchParams(window.location.search);
@@ -242,22 +226,22 @@ export default function Annotate() {
       if (pid) {
         projectId.current = pid;
         setProjectLoading(true);
-        const { data: proj } = await supabase.from('projects').select('*').eq('id', pid).single();
+        const {data:proj} = await supabase.from('projects').select('*').eq('id',pid).single();
         if (proj) {
-          setFileName(proj.file_name || 'project');
-          setDisplayCols(proj.display_cols || ['','']);
-          setScores(proj.scores || {});
-          setNotes(proj.notes || {});
-          setMetrics(proj.metrics || []);
-          storageKey.current = 'annot_' + pid;
-          const cached = localStorage.getItem('sheet_' + pid);
+          setFileName(proj.file_name||'project');
+          setDisplayCols(proj.display_cols||[]);
+          setScores(proj.scores||{});
+          setNotes(proj.notes||{});
+          setMetrics(proj.metrics||[]);
+          setIncludeNotes(proj.include_notes!==false);
+          storageKey.current='annot_'+pid;
+          const cached=localStorage.getItem('sheet_'+pid);
           if (cached) {
             try {
-              const parsed = JSON.parse(cached);
-              setSheetData(parsed.data || []);
-              setOriginalHeaders(parsed.headers || []);
-              setHeaderRowIdx(parsed.headerRowIdx || 0);
-              setMetaLines(parsed.metaLines || []);
+              const parsed=JSON.parse(cached);
+              setSheetData(parsed.data||[]);
+              setOriginalHeaders(parsed.headers||[]);
+              setHeaderRowIdx(parsed.headerRowIdx||0);
               setScreen('annotate');
             } catch(e) {}
           }
@@ -265,138 +249,137 @@ export default function Annotate() {
         setProjectLoading(false);
       }
     });
-  }, []);
+  },[]);
 
   useEffect(() => {
     if (document.getElementById('katex-css')) return;
-    const link = document.createElement('link');
-    link.id = 'katex-css'; link.rel = 'stylesheet';
-    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css';
+    const link=document.createElement('link');
+    link.id='katex-css';link.rel='stylesheet';
+    link.href='https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css';
     document.head.appendChild(link);
-    const s1 = document.createElement('script');
-    s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js';
-    s1.onload = () => {
-      const s2 = document.createElement('script');
-      s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js';
+    const s1=document.createElement('script');
+    s1.src='https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js';
+    s1.onload=()=>{
+      const s2=document.createElement('script');
+      s2.src='https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js';
       document.head.appendChild(s2);
     };
     document.head.appendChild(s1);
-    const s3 = document.createElement('script');
-    s3.src = 'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
+    const s3=document.createElement('script');
+    s3.src='https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
     document.head.appendChild(s3);
-  }, []);
+  },[]);
 
   useEffect(() => {
-    if (screen !== 'annotate') return;
-    const tryRender = () => {
+    if (screen!=='annotate') return;
+    const tryRender=()=>{
       if (window.renderMathInElement) {
-        contentRefs.current.forEach(el => {
-          if (el) window.renderMathInElement(el, {
-            delimiters: [
+        contentRefs.current.forEach(el=>{
+          if (el) window.renderMathInElement(el,{
+            delimiters:[
               {left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},
               {left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true},
-            ], throwOnError: false,
+            ],throwOnError:false,
           });
         });
       }
     };
-    setTimeout(tryRender, 100);
-  }, [screen, currentIdx, sheetData, activeTab, layoutMode]);
+    setTimeout(tryRender,100);
+  },[screen,currentIdx,sheetData,activeTab,layoutMode]);
 
   useEffect(() => {
     if (leftPanelRef.current) leftPanelRef.current.scrollTo({top:0,behavior:'smooth'});
     setActiveTab(0);
-  }, [currentIdx]);
+  },[currentIdx]);
 
   function renderMD(text) {
-    const mathBlocks = [];
-    const TOKEN = '~~MATH_'; const TOKEND = '_MATH~~';
-    const protect = (m) => { mathBlocks.push(m); return TOKEN+(mathBlocks.length-1)+TOKEND; };
-    let s = String(text||'');
-    s = s.replace(/\$\$[\s\S]*?\$\$/g,protect);
-    s = s.replace(/\\\[[\s\S]*?\\\]/g,protect);
-    s = s.replace(/\\\([\s\S]*?\\\)/g,protect);
-    s = s.replace(/\$[^\$\n]+?\$/g,protect);
-    s = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    s = s.replace(/^### (.+)$/gm,'<div class="md-h3">$1</div>');
-    s = s.replace(/^## (.+)$/gm,'<div class="md-h2">$1</div>');
-    s = s.replace(/^# (.+)$/gm,'<div class="md-h1">$1</div>');
-    s = s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-    s = s.replace(/\*(.+?)\*/g,'<em>$1</em>');
-    s = s.replace(/`([^`]+)`/g,'<code class="md-code">$1</code>');
-    s = s.replace(/^---+$/gm,'<hr class="md-hr">');
-    s = s.replace(/((?:^[ \t]*[-*][ \t].+\n?)+)/gm,block=>{
+    const mathBlocks=[];
+    const TOKEN='~~MATH_';const TOKEND='_MATH~~';
+    const protect=(m)=>{mathBlocks.push(m);return TOKEN+(mathBlocks.length-1)+TOKEND;};
+    let s=String(text||'');
+    s=s.replace(/\$\$[\s\S]*?\$\$/g,protect);
+    s=s.replace(/\\\[[\s\S]*?\\\]/g,protect);
+    s=s.replace(/\\\([\s\S]*?\\\)/g,protect);
+    s=s.replace(/\$[^\$\n]+?\$/g,protect);
+    s=s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    s=s.replace(/^### (.+)$/gm,'<div class="md-h3">$1</div>');
+    s=s.replace(/^## (.+)$/gm,'<div class="md-h2">$1</div>');
+    s=s.replace(/^# (.+)$/gm,'<div class="md-h1">$1</div>');
+    s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    s=s.replace(/\*(.+?)\*/g,'<em>$1</em>');
+    s=s.replace(/`([^`]+)`/g,'<code class="md-code">$1</code>');
+    s=s.replace(/^---+$/gm,'<hr class="md-hr">');
+    s=s.replace(/((?:^[ \t]*[-*][ \t].+\n?)+)/gm,block=>{
       const items=block.trim().split('\n').map(l=>`<li>${l.replace(/^[ \t]*[-*][ \t]/,'').trim()}</li>`).join('');
       return `<ul class="md-ul">${items}</ul>`;
     });
-    s = s.replace(/((?:^[ \t]*\d+\.[ \t].+\n?)+)/gm,block=>{
+    s=s.replace(/((?:^[ \t]*\d+\.[ \t].+\n?)+)/gm,block=>{
       const items=block.trim().split('\n').map(l=>`<li>${l.replace(/^[ \t]*\d+\.[ \t]/,'').trim()}</li>`).join('');
       return `<ol class="md-ol">${items}</ol>`;
     });
-    s = s.replace(/\n/g,'<br>');
-    s = s.replace(new RegExp(TOKEN.replace(/~/g,'\\~')+'(\\d+)'+TOKEND.replace(/~/g,'\\~'),'g'),(_,i)=>mathBlocks[+i]);
+    s=s.replace(/\n/g,'<br>');
+    s=s.replace(new RegExp(TOKEN.replace(/~/g,'\\~')+'(\\d+)'+TOKEND.replace(/~/g,'\\~'),'g'),(_,i)=>mathBlocks[+i]);
     return s;
   }
 
   function handleFile(file) {
     setUploadError('');
-    const name = file.name.replace(/\.[^.]+$/,'');
+    const name=file.name.replace(/\.[^.]+$/,'');
     setFileName(name);
-    storageKey.current = 'annot_' + name;
-    const reader = new FileReader();
-    reader.onload = e => {
+    storageKey.current='annot_'+name;
+    const reader=new FileReader();
+    reader.onload=e=>{
       try {
-        const XLSX = window.XLSX;
-        if (!XLSX) { setUploadError('File parser still loading, please try again in a second.'); return; }
-        const wb = XLSX.read(e.target.result,{type:'array'});
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const raw2D = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-        if (!raw2D.length) { setUploadError('The file appears to be empty.'); return; }
-        const isHeaderRow = (row) => {
-          const cells = row.map(c=>String(c||'').toLowerCase().trim());
-          return cells.some(c=>c==='question'||c.startsWith('question')||c==='prompt'||c==='text'||c==='input'||c==='essay'||c==='sentence') &&
-            cells.some(c=>c==='solution'||c.startsWith('solution')||c==='answer'||c==='output'||c==='response'||c==='translation');
+        const XLSX=window.XLSX;
+        if (!XLSX) {setUploadError('File parser still loading, please try again in a second.');return;}
+        const wb=XLSX.read(e.target.result,{type:'array'});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        const raw2D=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        if (!raw2D.length) {setUploadError('The file appears to be empty.');return;}
+        const isHeaderRow=(row)=>{
+          const cells=row.map(c=>String(c||'').toLowerCase().trim());
+          return cells.some(c=>['question','prompt','text','input','essay','sentence','source'].some(k=>c.includes(k)))&&
+            cells.some(c=>['solution','answer','output','response','translation','target'].some(k=>c.includes(k)));
         };
-        let hIdx = 0;
-        for (let i=0;i<Math.min(raw2D.length,15);i++) { if(isHeaderRow(raw2D[i])) {hIdx=i;break;} }
+        let hIdx=0;
+        for (let i=0;i<Math.min(raw2D.length,15);i++){if(isHeaderRow(raw2D[i])){hIdx=i;break;}}
         setHeaderRowIdx(hIdx);
-        const meta = raw2D.slice(0,hIdx).map(row=>row.filter(Boolean).join(' | ')).filter(Boolean);
-        setMetaLines(meta);
-        const rawHeaders = raw2D[hIdx];
-        const headers = rawHeaders.map(h=>String(h||'').trim()).filter(Boolean);
-        const dataRaw = raw2D.slice(hIdx+1).filter(row=>row.some(c=>c!==''&&c!==null&&c!==undefined));
-        const data = dataRaw.map(row=>{
+        const rawHeaders=raw2D[hIdx];
+        const headers=rawHeaders.map(h=>String(h||'').trim()).filter(Boolean);
+        const dataRaw=raw2D.slice(hIdx+1).filter(row=>row.some(c=>c!==''&&c!==null&&c!==undefined));
+        const data=dataRaw.map(row=>{
           const obj={};
           rawHeaders.forEach((h,i)=>{if(h!==''&&h!==null&&h!==undefined)obj[String(h).trim()]=String(row[i]??'');});
           return obj;
         });
-        if (!data.length) { setUploadError('No data rows found after the header row.'); return; }
+        if (!data.length) {setUploadError('No data rows found.');return;}
         setSheetData(data);
         setOriginalHeaders(headers);
-        const lc = h=>h.toLowerCase();
-        const findCol = (...keys) => headers.find(h=>keys.some(k=>lc(h).includes(k)))||'';
-        const q = findCol('question','quest','problem','prompt','text','input','essay','sentence');
-        const s = findCol('solution','answer','sol','response','output','translation');
-        setDisplayCols([q,s].filter(Boolean).length > 0 ? [q,s].filter(Boolean) : [headers[0]]);
-        localStorage.setItem('sheet_'+(projectId.current||storageKey.current),JSON.stringify({data,headers,headerRowIdx:hIdx,metaLines:meta}));
+        const lc=h=>h.toLowerCase();
+        const findCol=(...keys)=>headers.find(h=>keys.some(k=>lc(h).includes(k)))||'';
+        const q=findCol('question','prompt','text','input','essay','sentence');
+        const s=findCol('solution','answer','output','response','translation');
+        const initCols=[q,s].filter(Boolean);
+        setDisplayCols(initCols.length>0?initCols:[headers[0]].filter(Boolean));
+        localStorage.setItem('sheet_'+(projectId.current||storageKey.current),JSON.stringify({data,headers,headerRowIdx:hIdx}));
         setScreen('step2');
-      } catch(err) { setUploadError('Could not read this file: '+err.message); }
+      } catch(err) {setUploadError('Could not read this file: '+err.message);}
     };
     reader.readAsArrayBuffer(file);
   }
 
   function addDisplayCol() {
-    const available = originalHeaders.filter(h=>!displayCols.includes(h));
-    if (available.length === 0) return;
-    setDisplayCols(prev=>[...prev, available[0]]);
+    const available=originalHeaders.filter(h=>!displayCols.includes(h));
+    if (available.length===0) return;
+    setDisplayCols(prev=>[...prev,available[0]]);
   }
 
   function removeDisplayCol(idx) {
-    if (displayCols.length <= 1) return;
+    if (displayCols.length<=1) return;
     setDisplayCols(prev=>prev.filter((_,i)=>i!==idx));
   }
 
-  function updateDisplayCol(idx, val) {
+  function updateDisplayCol(idx,val) {
     setDisplayCols(prev=>prev.map((c,i)=>i===idx?val:c));
   }
 
@@ -405,54 +388,55 @@ export default function Annotate() {
   }
 
   function goToStep3() {
-    const validCols = displayCols.filter(Boolean);
-    if (validCols.length === 0) { setUploadError('Please select at least one content column.'); return; }
+    const valid=displayCols.filter(Boolean);
+    if (valid.length===0){setUploadError('Please select at least one content column.');return;}
     setUploadError('');
-    setDisplayCols(validCols);
-    const detected = detectMetrics(originalHeaders, sheetData, validCols);
-    setMetrics(detected);
+    setDisplayCols(valid);
+    setMetrics(detectMetrics(originalHeaders,sheetData,valid));
     setScreen('step3');
   }
 
   function startAnnotation() {
-    if (metrics.length === 0) return;
-    setCurrentIdx(0);
-    setActiveTab(0);
+    if (metrics.length===0) return;
+    setCurrentIdx(0);setActiveTab(0);
     setScreen('annotate');
   }
 
   function addMetric() {
-    const suggested = suggestLabels('Metric', 5);
+    const s=suggestLabels('Metric',5);
     setMetrics(prev=>[...prev,{
-      id: Math.random().toString(36).slice(2),
-      name: `Metric ${prev.length+1}`,
-      scaleType: 'preset', scaleStart: 1, scaleEnd: 5, scale: 5,
-      labels: buildLabelsForRange(1,5,suggested.labels.map(l=>({label:l}))),
-      suggested: false, confidence: 0,
+      id:Math.random().toString(36).slice(2),
+      name:`Metric ${prev.length+1}`,
+      scaleType:'preset',scaleStart:1,scaleEnd:5,scale:5,
+      labels:buildLabelsForRange(1,5,s.labels.map(l=>({label:l}))),
+      suggested:false,
     }]);
   }
 
-  function removeMetric(id) { setMetrics(prev=>prev.filter(m=>m.id!==id)); }
+  function removeMetric(id){setMetrics(prev=>prev.filter(m=>m.id!==id));}
 
-  function updateMetricName(id, name) {
+  function updateMetricName(id,name) {
     setMetrics(prev=>prev.map(m=>{
       if (m.id!==id) return m;
-      const s = suggestLabels(name, m.scale);
-      return {...m, name, labels: buildLabelsForRange(m.scaleStart, m.scaleEnd, s.labels.map(l=>({label:l})))};
+      const s=suggestLabels(name,m.scale);
+      return {...m,name,labels:buildLabelsForRange(m.scaleStart,m.scaleEnd,s.labels.map(l=>({label:l})))};
     }));
   }
 
-  function updateMetricScale(id, scaleType, start, end) {
+  function updateMetricScale(id,scaleType,start,end) {
     setMetrics(prev=>prev.map(m=>{
       if (m.id!==id) return m;
-      const s = end - start + 1;
-      const suggested = suggestLabels(m.name, s);
-      return {...m, scaleType, scaleStart:start, scaleEnd:end, scale:s,
-        labels: buildLabelsForRange(start,end,suggested.labels.map(l=>({label:l})))};
+      const safeStart=isNaN(start)?0:start;
+      const safeEnd=isNaN(end)?safeStart+4:end;
+      const finalEnd=safeEnd<=safeStart?safeStart+1:safeEnd;
+      const scale=finalEnd-safeStart+1;
+      const s=suggestLabels(m.name,scale);
+      return {...m,scaleType,scaleStart:safeStart,scaleEnd:finalEnd,scale,
+        labels:buildLabelsForRange(safeStart,finalEnd,s.labels.map(l=>({label:l})))};
     }));
   }
 
-  function updateLabel(metricId, valueIdx, label) {
+  function updateLabel(metricId,valueIdx,label) {
     setMetrics(prev=>prev.map(m=>{
       if (m.id!==metricId) return m;
       const labels=[...m.labels];
@@ -467,12 +451,24 @@ export default function Annotate() {
     return metrics.every(m=>s[m.id]!==undefined&&s[m.id]!==null&&s[m.id]!=='');
   }
 
-  function countDone() { return sheetData.filter((_,i)=>isScored(i)).length; }
+  function countDone(){return sheetData.filter((_,i)=>isScored(i)).length;}
 
-  function setScore(metricId, val) {
-    const next={...scores,[currentIdx]:{...(scores[currentIdx]||{}),[metricId]:val}};
+  function setScore(metricId,val) {
+    const cur=scores[currentIdx]?.[metricId];
+    const newVal=cur===val?null:val;
+    const next={...scores,[currentIdx]:{...(scores[currentIdx]||{}),[metricId]:newVal}};
+    if (newVal===null) delete next[currentIdx][metricId];
     setScores(next);
     persist(next,notes);
+    if (autoAdvance&&newVal!==null) {
+      const allDone=metrics.every(m=>{
+        const v=next[currentIdx]?.[m.id];
+        return v!==undefined&&v!==null&&v!=='';
+      });
+      if (allDone&&currentIdx<sheetData.length-1) {
+        setTimeout(()=>setCurrentIdx(i=>i+1),300);
+      }
+    }
   }
 
   function saveNote(val) {
@@ -485,11 +481,12 @@ export default function Annotate() {
     try {
       localStorage.setItem(storageKey.current,JSON.stringify({scores:s,notes:n}));
       const done=sheetData.filter((_,i)=>{
-        const sc=s[i]; if(!sc) return false;
+        const sc=s[i];if(!sc)return false;
         return metrics.every(m=>sc[m.id]!==undefined&&sc[m.id]!==null&&sc[m.id]!=='');
       }).length;
       if (user) {
-        const payload={scores:s,notes:n,done_rows:done,updated_at:new Date().toISOString(),display_cols:displayCols,metrics};
+        const payload={scores:s,notes:n,done_rows:done,updated_at:new Date().toISOString(),
+          display_cols:displayCols,metrics,include_notes:includeNotes};
         if (!projectId.current) {
           const {data}=await supabase.from('projects').insert({
             user_id:user.id,name:fileName,file_name:fileName,...payload,
@@ -505,18 +502,20 @@ export default function Annotate() {
       setSaveBadge(`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`);
       setSaveFlash(true);
       setTimeout(()=>setSaveFlash(false),1500);
-    } catch(e) {}
+    } catch(e){}
   }
 
   function exportXLSX() {
-    const done=countDone(); const total=sheetData.length;
+    const done=countDone();const total=sheetData.length;
     if (done<total&&!confirm(`${total-done} row(s) not fully scored. Export anyway?`)) return;
-    const XLSX=window.XLSX; if(!XLSX) return;
+    const XLSX=window.XLSX;if(!XLSX)return;
     const outputRows=sheetData.map((row,i)=>{
       const s=scores[i]||{};
       const scoreObj={};
       metrics.forEach(m=>{scoreObj[m.name]=s[m.id]??'';});
-      return {...row,...scoreObj,Annotator_Notes:notes[i]||''};
+      const result={...row,...scoreObj};
+      if (includeNotes) result['Annotator_Notes']=notes[i]||'';
+      return result;
     });
     const wb=XLSX.utils.book_new();
     const ws=XLSX.utils.json_to_sheet(outputRows);
@@ -524,7 +523,7 @@ export default function Annotate() {
     XLSX.writeFile(wb,`${fileName}_annotated.xlsx`);
   }
 
-  async function signOut() { await supabase.auth.signOut(); window.location.href='/'; }
+  async function signOut(){await supabase.auth.signOut();window.location.href='/';}
 
   if (!authChecked||projectLoading) return (
     <div style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#0f1117',color:'#e2e8f8',fontFamily:'monospace',fontSize:'13px',letterSpacing:'2px'}}>
@@ -540,25 +539,14 @@ export default function Annotate() {
   const answeredCount=metrics.filter(m=>curScores[m.id]!==undefined&&curScores[m.id]!==null&&curScores[m.id]!=='').length;
   const validDisplayCols=displayCols.filter(Boolean);
 
-  const scoreColors=['',
-    {bg:'#5c1a1a',border:'#f25e5e',text:'#fca5a5'},
-    {bg:'#5c3010',border:'#f97316',text:'#fdba74'},
-    {bg:'#4d3a00',border:'#f5a623',text:'#fcd34d'},
-    {bg:'#1a3d1a',border:'#4ade80',text:'#86efac'},
-    {bg:'#0d2d0d',border:'#3ecf6e',text:'#3ecf6e'},
-    {bg:'#0d2d0d',border:'#3ecf6e',text:'#3ecf6e'},
-    {bg:'#0d2040',border:'#4f8ef7',text:'#93c5fd'},
-    {bg:'#1a1540',border:'#7c5fe6',text:'#c4b5fd'},
-    {bg:'#1a2540',border:'#4f8ef7',text:'#93c5fd'},
-    {bg:'#0d1a30',border:'#3ecf6e',text:'#3ecf6e'},
-  ];
-
-  function getScoreColor(val, scaleStart, scaleEnd) {
-    const range=scaleEnd-scaleStart;
-    if (range===0) return scoreColors[3];
-    const normalized=Math.round(((val-scaleStart)/range)*9)+1;
-    const idx=Math.max(1,Math.min(normalized,scoreColors.length-1));
-    return scoreColors[idx];
+  function getScoreColor(val,scaleStart,scaleEnd) {
+    const range=scaleEnd-scaleStart||1;
+    const normalized=(val-scaleStart)/range;
+    if (normalized<=0.2) return {bg:'#5c1a1a',border:'#f25e5e',text:'#fca5a5'};
+    if (normalized<=0.4) return {bg:'#5c3010',border:'#f97316',text:'#fdba74'};
+    if (normalized<=0.6) return {bg:'#4d3a00',border:'#f5a623',text:'#fcd34d'};
+    if (normalized<=0.8) return {bg:'#1a3d1a',border:'#4ade80',text:'#86efac'};
+    return {bg:'#0d2d0d',border:'#3ecf6e',text:'#3ecf6e'};
   }
 
   return (
@@ -571,10 +559,9 @@ export default function Annotate() {
         body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
         .wizard{display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:40px 20px;background:radial-gradient(ellipse at 50% 0%,#1a1f3a 0%,var(--bg) 60%)}
         .wizard-logo{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:32px;opacity:.7}
-        .wizard-steps{display:flex;align-items:center;gap:0;margin-bottom:40px}
+        .wizard-steps{display:flex;align-items:center;margin-bottom:40px}
         .wstep{display:flex;align-items:center;gap:8px;font-size:12px;font-family:var(--mono);color:var(--text-faint)}
-        .wstep.active{color:var(--accent)}
-        .wstep.done{color:var(--green)}
+        .wstep.active{color:var(--accent)}.wstep.done{color:var(--green)}
         .wstep-num{width:24px;height:24px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
         .wstep-line{width:40px;height:1px;background:var(--border);margin:0 8px}
         .wizard-card{width:100%;max-width:600px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 32px}
@@ -589,11 +576,11 @@ export default function Annotate() {
         .drop-accept{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:1px}
         .upload-error{margin-top:16px;color:var(--red);font-size:13px;background:rgba(242,94,94,.08);border:1px solid rgba(242,94,94,.3);border-radius:8px;padding:10px 14px;text-align:center}
         .col-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-        .col-tag{font-size:11px;font-family:var(--mono);font-weight:600;padding:3px 8px;border-radius:4px;white-space:nowrap}
+        .col-num{font-size:11px;font-family:var(--mono);font-weight:600;padding:3px 8px;border-radius:4px;background:rgba(79,142,247,.1);color:var(--accent);white-space:nowrap}
         .col-select{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 10px;outline:none;cursor:pointer}
         .col-select:focus{border-color:var(--accent)}
-        .btn-remove-col{background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1}
-        .btn-remove-col:hover{color:var(--red)}
+        .btn-remove-col{background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:18px;padding:2px 6px;line-height:1;border-radius:4px}
+        .btn-remove-col:hover{color:var(--red);background:rgba(242,94,94,.08)}
         .btn-add-col{width:100%;padding:9px;background:transparent;border:1.5px dashed var(--border);border-radius:7px;color:var(--text-dim);font-family:var(--sans);font-size:12px;cursor:pointer;transition:all .15s;margin-top:4px}
         .btn-add-col:hover{border-color:var(--accent);color:var(--accent)}
         .header-info{margin-bottom:16px;padding:8px 12px;background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.25);border-radius:7px;font-size:12px;color:var(--accent);font-family:var(--mono)}
@@ -603,27 +590,37 @@ export default function Annotate() {
         .preview-content:last-child{border-bottom:none}
         .preview-content strong{color:var(--text);font-weight:500}
         .metric-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;position:relative}
-        .metric-card.suggested{border-color:rgba(79,142,247,.3)}
-        .metric-name-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 10px;outline:none;margin-bottom:12px}
+        .metric-name-wrap{position:relative;margin-bottom:12px}
+        .metric-name-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--sans);font-size:13px;font-weight:600;padding:9px 36px 9px 10px;outline:none;transition:border-color .15s}
         .metric-name-input:focus{border-color:var(--accent)}
-        .metric-scale-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+        .edit-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:13px;pointer-events:none}
+        .labels-hint{font-size:11px;color:var(--text-faint);margin-bottom:8px;font-style:italic}
+        .metric-scale-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
         .scale-label{font-size:11px;color:var(--text-dim);white-space:nowrap}
         .scale-select{background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 8px;outline:none;cursor:pointer}
         .scale-select:focus{border-color:var(--accent)}
-        .scale-input{width:60px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 8px;outline:none;text-align:center}
+        .scale-input{width:64px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 8px;outline:none;text-align:center}
         .scale-input:focus{border-color:var(--accent)}
-        .metric-labels-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+        .metric-labels-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px}
         .label-wrap{display:flex;align-items:center;gap:6px}
-        .label-num{font-family:var(--mono);font-size:11px;color:var(--accent);width:20px;flex-shrink:0;text-align:right}
-        .label-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:5px 7px;outline:none}
-        .label-input:focus{border-color:var(--accent)}
-        .label-input::placeholder{color:var(--text-faint)}
+        .label-num{font-family:var(--mono);font-size:11px;color:var(--accent);width:22px;flex-shrink:0;text-align:right}
+        .label-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:12px;padding:5px 8px;outline:none;transition:border-color .15s}
+        .label-input:focus{border-color:var(--accent);background:var(--surface2)}
+        .label-input::placeholder{color:var(--text-faint);font-style:italic}
         .label-minmax{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-        .metric-remove{position:absolute;top:12px;right:12px;background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:18px;line-height:1;padding:2px}
-        .metric-remove:hover{color:var(--red)}
-        .suggested-badge{font-size:10px;font-family:var(--mono);padding:2px 7px;background:rgba(79,142,247,.1);color:var(--accent);border-radius:99px;border:1px solid rgba(79,142,247,.2);margin-bottom:10px;display:inline-block}
+        .metric-remove{position:absolute;top:12px;right:12px;background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:18px;line-height:1;padding:2px 5px;border-radius:4px}
+        .metric-remove:hover{color:var(--red);background:rgba(242,94,94,.08)}
         .btn-add-metric{width:100%;padding:10px;background:transparent;border:1.5px dashed var(--border);border-radius:8px;color:var(--text-dim);font-family:var(--sans);font-size:13px;cursor:pointer;transition:all .15s;margin-top:4px}
         .btn-add-metric:hover{border-color:var(--accent);color:var(--accent)}
+        .notes-toggle-row{display:flex;align-items:center;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+        .toggle-switch{position:relative;width:36px;height:20px;flex-shrink:0}
+        .toggle-switch input{opacity:0;width:0;height:0}
+        .toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:99px;cursor:pointer;transition:.2s}
+        .toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s}
+        .toggle-switch input:checked+.toggle-slider{background:var(--accent)}
+        .toggle-switch input:checked+.toggle-slider:before{transform:translateX(16px)}
+        .toggle-label{font-size:13px;color:var(--text-dim)}
+        .toggle-label strong{color:var(--text);font-weight:500}
         .wizard-footer{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
         .btn-back{padding:10px 20px;background:transparent;border:1.5px solid var(--border);border-radius:8px;color:var(--text-dim);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
         .btn-back:hover{border-color:var(--accent);color:var(--accent)}
@@ -633,18 +630,19 @@ export default function Annotate() {
         #topbar{position:sticky;top:0;z-index:300;background:rgba(15,17,23,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:var(--topbar-h);gap:12px}
         .tb-left{display:flex;align-items:center;gap:14px;min-width:0}
         .tb-brand{font-family:var(--mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);white-space:nowrap;cursor:pointer}
-        .tb-file{font-size:12px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
-        .progress-bar-wrap{flex:1;max-width:140px;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden}
+        .tb-file{font-size:12px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+        .progress-bar-wrap{flex:1;max-width:120px;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden}
         .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .3s ease}
         .progress-label{font-family:var(--mono);font-size:11px;color:var(--text-dim);white-space:nowrap}
         .tb-right{display:flex;align-items:center;gap:10px}
-        .save-indicator{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--text-faint)}
+        .save-indicator{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text-faint)}
         .save-dot{width:7px;height:7px;border-radius:50%;background:var(--text-faint);transition:background .3s,box-shadow .3s;flex-shrink:0}
-        .save-dot.flash{background:var(--green);box-shadow:0 0 6px var(--green)}
-        .btn-export{display:flex;align-items:center;gap:7px;padding:8px 16px;background:var(--green);color:#000;font-family:var(--sans);font-size:13px;font-weight:700;border:none;border-radius:7px;cursor:pointer;transition:background .15s;white-space:nowrap}
+        .save-dot.flash{background:var(--green);box-shadow:0 0 8px var(--green)}
+        .auto-advance-wrap{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);white-space:nowrap}
+        .btn-export{display:flex;align-items:center;gap:7px;padding:8px 14px;background:var(--green);color:#000;font-family:var(--sans);font-size:12px;font-weight:700;border:none;border-radius:7px;cursor:pointer;transition:background .15s;white-space:nowrap}
         .btn-export:hover{background:#2ebc5c}
         .btn-export.incomplete{background:var(--amber)}
-        .btn-signout{padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-size:11px;cursor:pointer;font-family:var(--sans)}
+        .btn-signout{padding:6px 10px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-size:11px;cursor:pointer;font-family:var(--sans)}
         .btn-signout:hover{border-color:var(--accent);color:var(--accent)}
         #pill-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;position:sticky;top:var(--topbar-h);z-index:200}
         .pill-label{font-size:11px;font-family:var(--mono);color:var(--text-faint);margin-right:6px;text-transform:uppercase;letter-spacing:1px}
@@ -658,13 +656,14 @@ export default function Annotate() {
         #right-panel{position:sticky;top:calc(var(--topbar-h) + 44px);height:calc(100vh - var(--topbar-h) - 44px);overflow-y:auto;background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--border) transparent}
         .content-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
         .tab-bar{display:flex;align-items:center;background:var(--surface2);border-bottom:1px solid var(--border);overflow-x:auto}
-        .tab-btn{padding:9px 16px;font-size:12px;font-family:var(--mono);color:var(--text-dim);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+        .tab-btn{padding:9px 16px;font-size:12px;font-family:var(--mono);color:var(--text-dim);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;flex-shrink:0}
         .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
         .tab-btn:hover{color:var(--text)}
-        .layout-toggle{margin-left:auto;padding:6px 10px;font-size:10px;font-family:var(--mono);color:var(--text-faint);cursor:pointer;border:none;background:transparent;border-left:1px solid var(--border);white-space:nowrap}
+        .layout-toggle{margin-left:auto;padding:6px 10px;font-size:10px;font-family:var(--mono);color:var(--text-faint);cursor:pointer;border:none;background:transparent;border-left:1px solid var(--border);white-space:nowrap;flex-shrink:0}
         .layout-toggle:hover{color:var(--accent)}
         .card-body{padding:18px 20px;font-size:14.5px;line-height:1.9;color:#d4daf4}
-        .stacked-head{padding:8px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+        .stacked-head{padding:8px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center}
+        .stacked-col-name{font-size:11px;font-family:var(--mono);color:var(--text-dim)}
         .katex-display{overflow-x:auto;overflow-y:hidden;padding:6px 0}
         .katex{font-size:1.05em}
         .md-h1{font-size:17px;font-weight:700;margin:14px 0 6px;color:var(--text)}
@@ -686,7 +685,7 @@ export default function Annotate() {
         .score-completion{font-family:var(--mono);font-size:11px;color:var(--text-faint)}
         .score-dim{padding:12px 16px;border-bottom:1px solid var(--border)}
         .score-dim:last-child{border-bottom:none}
-        .score-dim-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+        .score-dim-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
         .score-dim-hint{font-size:11px;color:var(--text-dim);margin-bottom:8px;font-style:italic;line-height:1.5}
         .btn-row{display:flex;flex-wrap:wrap;gap:5px}
         .score-btn{border:1.5px solid var(--border);background:transparent;border-radius:6px;padding:7px 8px;min-width:44px;font-size:11.5px;font-family:var(--mono);font-weight:600;cursor:pointer;color:var(--text-dim);transition:all .13s;text-align:center;line-height:1.3}
@@ -700,7 +699,7 @@ export default function Annotate() {
         @media(max-width:780px){#split-wrap{grid-template-columns:1fr}#right-panel{position:static;height:auto;border-top:1px solid var(--border)}#left-panel{border-right:none}}
       `}</style>
 
-      {/* STEP 1: Upload */}
+      {/* STEP 1 */}
       {screen==='upload'&&(
         <div className="wizard">
           <div className="wizard-logo">Annotation Studio</div>
@@ -731,7 +730,7 @@ export default function Annotate() {
         </div>
       )}
 
-      {/* STEP 2: Map Columns */}
+      {/* STEP 2 */}
       {screen==='step2'&&(
         <div className="wizard">
           <div className="wizard-logo">Annotation Studio</div>
@@ -744,11 +743,11 @@ export default function Annotate() {
           </div>
           <div className="wizard-card">
             <div className="wizard-title">Choose content columns</div>
-            <div className="wizard-sub">Select which columns to show the annotator. Selected columns are automatically excluded from metric detection. Minimum 1, no maximum.</div>
+            <div className="wizard-sub">Select which columns to show the annotator. These are excluded from metric detection. Minimum 1 column required.</div>
             {headerRowIdx>0&&<div className="header-info">↳ Auto-skipped {headerRowIdx} header/instruction row(s). Found {sheetData.length} data rows.</div>}
             {displayCols.map((col,idx)=>(
               <div key={idx} className="col-row">
-                <span className="col-tag" style={{background:'rgba(79,142,247,.1)',color:'var(--accent)'}}>Col {idx+1}</span>
+                <span className="col-num">Col {idx+1}</span>
                 <select className="col-select" value={col} onChange={e=>updateDisplayCol(idx,e.target.value)}>
                   <option value="">— select column —</option>
                   {getAvailableForCol(idx).map(h=><option key={h} value={h}>{h}</option>)}
@@ -778,7 +777,7 @@ export default function Annotate() {
         </div>
       )}
 
-      {/* STEP 3: Set Metrics */}
+      {/* STEP 3 */}
       {screen==='step3'&&(
         <div className="wizard">
           <div className="wizard-logo">Annotation Studio</div>
@@ -793,23 +792,27 @@ export default function Annotate() {
             <div className="wizard-title">Define your scoring metrics</div>
             <div className="wizard-sub">
               {metrics.filter(m=>m.suggested).length>0
-                ? `We auto-detected ${metrics.filter(m=>m.suggested).length} metric(s) from your file with suggested labels. Review, adjust, or add more.`
-                : `No numeric columns detected. Add your metrics below — labels are auto-suggested as you type the name.`}
+                ?`We detected ${metrics.filter(m=>m.suggested).length} metric(s) from your file. Labels are auto-suggested — click any label to edit it.`
+                :`No score columns detected. Define your metrics below — labels auto-suggest as you type the name.`}
             </div>
             {metrics.map((m)=>{
-              const isCustom = m.scaleType==='custom';
-              const showIndividual = m.scale<=20;
+              const isCustom=m.scaleType==='custom';
+              const showIndividual=m.scale<=20;
               return (
-                <div key={m.id} className={`metric-card${m.suggested?' suggested':''}`}>
+                <div key={m.id} className="metric-card">
                   {metrics.length>1&&<button className="metric-remove" onClick={()=>removeMetric(m.id)}>×</button>}
-                  {m.suggested&&<div className="suggested-badge">auto-detected · {m.scaleStart} to {m.scaleEnd}</div>}
-                  <input className="metric-name-input" value={m.name} onChange={e=>updateMetricName(m.id,e.target.value)} placeholder="Metric name (e.g. Fluency, Accuracy)"/>
+                  <div className="metric-name-wrap">
+                    <input className="metric-name-input" value={m.name}
+                      onChange={e=>updateMetricName(m.id,e.target.value)}
+                      placeholder="Metric name (e.g. Fluency, Accuracy)"/>
+                    <span className="edit-icon">✎</span>
+                  </div>
                   <div className="metric-scale-row">
                     <span className="scale-label">Scale:</span>
                     <select className="scale-select" value={isCustom?'custom':m.scale}
                       onChange={e=>{
                         if (e.target.value==='custom') updateMetricScale(m.id,'custom',m.scaleStart,m.scaleEnd);
-                        else { const n=parseInt(e.target.value); updateMetricScale(m.id,'preset',1,n); }
+                        else {const n=parseInt(e.target.value);updateMetricScale(m.id,'preset',1,n);}
                       }}>
                       {[2,3,4,5,7,10].map(n=><option key={n} value={n}>1 – {n}</option>)}
                       <option value="custom">Custom range…</option>
@@ -818,19 +821,22 @@ export default function Annotate() {
                       <>
                         <span className="scale-label">from</span>
                         <input className="scale-input" type="number" value={m.scaleStart}
-                          onChange={e=>updateMetricScale(m.id,'custom',parseInt(e.target.value)||0,m.scaleEnd)}/>
+                          onChange={e=>updateMetricScale(m.id,'custom',parseInt(e.target.value),m.scaleEnd)}/>
                         <span className="scale-label">to</span>
                         <input className="scale-input" type="number" value={m.scaleEnd}
-                          onChange={e=>updateMetricScale(m.id,'custom',m.scaleStart,parseInt(e.target.value)||1)}/>
+                          onChange={e=>updateMetricScale(m.id,'custom',m.scaleStart,parseInt(e.target.value))}/>
                       </>
                     )}
                   </div>
+                  <div className="labels-hint">✎ Click any label below to edit it</div>
                   {showIndividual?(
                     <div className="metric-labels-grid">
                       {m.labels.map((l,i)=>(
                         <div key={i} className="label-wrap">
                           <span className="label-num">{l.value}</span>
-                          <input className="label-input" value={l.label} onChange={e=>updateLabel(m.id,i,e.target.value)} placeholder={`Score ${l.value}`}/>
+                          <input className="label-input" value={l.label}
+                            onChange={e=>updateLabel(m.id,i,e.target.value)}
+                            placeholder={`Score ${l.value} meaning…`}/>
                         </div>
                       ))}
                     </div>
@@ -838,11 +844,13 @@ export default function Annotate() {
                     <div className="label-minmax">
                       <div className="label-wrap">
                         <span className="label-num">{m.scaleStart}</span>
-                        <input className="label-input" value={m.labels[0]?.label||''} onChange={e=>updateLabel(m.id,0,e.target.value)} placeholder="Min label"/>
+                        <input className="label-input" value={m.labels[0]?.label||''}
+                          onChange={e=>updateLabel(m.id,0,e.target.value)} placeholder="Min label"/>
                       </div>
                       <div className="label-wrap">
                         <span className="label-num">{m.scaleEnd}</span>
-                        <input className="label-input" value={m.labels[m.labels.length-1]?.label||''} onChange={e=>updateLabel(m.id,m.labels.length-1,e.target.value)} placeholder="Max label"/>
+                        <input className="label-input" value={m.labels[m.labels.length-1]?.label||''}
+                          onChange={e=>updateLabel(m.id,m.labels.length-1,e.target.value)} placeholder="Max label"/>
                       </div>
                     </div>
                   )}
@@ -850,6 +858,13 @@ export default function Annotate() {
               );
             })}
             <button className="btn-add-metric" onClick={addMetric}>+ Add another metric</button>
+            <div className="notes-toggle-row">
+              <label className="toggle-switch">
+                <input type="checkbox" checked={includeNotes} onChange={e=>setIncludeNotes(e.target.checked)}/>
+                <span className="toggle-slider"></span>
+              </label>
+              <span className="toggle-label"><strong>Include annotator notes</strong> — an optional free-text field shown during annotation and exported as a column</span>
+            </div>
             <div className="wizard-footer">
               <button className="btn-back" onClick={()=>setScreen('step2')}>← Back</button>
               <button className="btn-next" onClick={startAnnotation}>Start Annotating →</button>
@@ -858,7 +873,7 @@ export default function Annotate() {
         </div>
       )}
 
-      {/* ANNOTATION SCREEN */}
+      {/* ANNOTATION */}
       {screen==='annotate'&&(
         <div>
           <div id="topbar">
@@ -871,9 +886,16 @@ export default function Annotate() {
             <div className="tb-right">
               <div className="save-indicator">
                 <div className={`save-dot${saveFlash?' flash':''}`}></div>
-                {saveBadge?`saved ${saveBadge}`:'not saved yet'}
+                {saveBadge||'not saved yet'}
               </div>
-              <button className={`btn-export${done<total?' incomplete':''}`} onClick={exportXLSX}>⬇ Download Excel</button>
+              <div className="auto-advance-wrap">
+                <label className="toggle-switch" style={{width:'28px',height:'16px'}}>
+                  <input type="checkbox" checked={autoAdvance} onChange={e=>setAutoAdvance(e.target.checked)}/>
+                  <span className="toggle-slider" style={{borderRadius:'99px'}}></span>
+                </label>
+                Auto-advance
+              </div>
+              <button className={`btn-export${done<total?' incomplete':''}`} onClick={exportXLSX}>⬇ Export</button>
               <button className="btn-signout" onClick={signOut}>Sign out</button>
             </div>
           </div>
@@ -881,7 +903,8 @@ export default function Annotate() {
           <div id="pill-bar">
             <span className="pill-label">Row</span>
             {sheetData.map((_,i)=>(
-              <button key={i} className={`nav-pill${isScored(i)?' done':''}${i===currentIdx?' active':''}`} onClick={()=>setCurrentIdx(i)}>{i+1}</button>
+              <button key={i} className={`nav-pill${isScored(i)?' done':''}${i===currentIdx?' active':''}`}
+                onClick={()=>setCurrentIdx(i)}>{i+1}</button>
             ))}
           </div>
 
@@ -892,13 +915,15 @@ export default function Annotate() {
                   <>
                     <div className="tab-bar">
                       {validDisplayCols.map((col,i)=>(
-                        <button key={col} className={`tab-btn${activeTab===i?' active':''}`} onClick={()=>setActiveTab(i)}>{col}</button>
+                        <button key={col} className={`tab-btn${activeTab===i?' active':''}`}
+                          onClick={()=>setActiveTab(i)}>{col}</button>
                       ))}
                       {validDisplayCols.length>1&&(
                         <button className="layout-toggle" onClick={()=>setLayoutMode('stacked')}>⊟ Stack all</button>
                       )}
                     </div>
-                    <div className="card-body" ref={el=>contentRefs.current[0]=el}
+                    <div className="card-body"
+                      ref={el=>contentRefs.current[0]=el}
                       dangerouslySetInnerHTML={{__html:renderMD(row[validDisplayCols[activeTab]]||'')}}/>
                   </>
                 ):(
@@ -906,8 +931,8 @@ export default function Annotate() {
                     {validDisplayCols.map((col,i)=>(
                       <div key={col}>
                         <div className="stacked-head">
-                          <span style={{fontSize:'11px',fontFamily:'var(--mono)',color:'var(--text-dim)'}}>{col}</span>
-                          {i===0&&<button className="layout-toggle" style={{marginLeft:'auto',borderLeft:'none',padding:'0'}} onClick={()=>setLayoutMode('tabs')}>⊡ Tab view</button>}
+                          <span className="stacked-col-name">{col}</span>
+                          {i===0&&<button className="layout-toggle" style={{marginLeft:'auto',borderLeft:'none'}} onClick={()=>setLayoutMode('tabs')}>⊡ Tab view</button>}
                         </div>
                         <div className="card-body" ref={el=>contentRefs.current[i]=el}
                           dangerouslySetInnerHTML={{__html:renderMD(row[col]||'')}}/>
@@ -917,11 +942,11 @@ export default function Annotate() {
                   </>
                 )}
               </div>
-
               <div id="bottom-nav">
                 <button className="nav-btn" disabled={currentIdx===0} onClick={()=>setCurrentIdx(i=>i-1)}>← Prev</button>
                 <div id="nav-center">Row {currentIdx+1} of {total}</div>
-                <button className={`nav-btn${currentIdx<total-1?' primary':''}`} disabled={currentIdx===total-1} onClick={()=>setCurrentIdx(i=>i+1)}>Next →</button>
+                <button className={`nav-btn${currentIdx<total-1?' primary':''}`} disabled={currentIdx===total-1}
+                  onClick={()=>setCurrentIdx(i=>i+1)}>Next →</button>
               </div>
             </div>
 
@@ -929,7 +954,9 @@ export default function Annotate() {
               <div id="score-panel-head">
                 <h2>Scoring Panel</h2>
                 <span className="score-completion">
-                  {answeredCount===metrics.length?<span className="score-done-badge">✓ Complete</span>:`${answeredCount} / ${metrics.length} answered`}
+                  {answeredCount===metrics.length
+                    ?<span className="score-done-badge">✓ Complete</span>
+                    :`${answeredCount} / ${metrics.length} answered`}
                 </span>
               </div>
 
@@ -942,9 +969,9 @@ export default function Annotate() {
                     <div className="score-dim-name">{m.name}</div>
                     {hintLabels.length>0&&(
                       <div className="score-dim-hint">
-                        {m.scale<=5
-                          ? hintLabels.map(l=>`${l.value}=${l.label}`).join(' · ')
-                          : `${m.labels[0]?.label?`${m.scaleStart}=${m.labels[0].label}`:''}${m.labels[m.labels.length-1]?.label?` · ${m.scaleEnd}=${m.labels[m.labels.length-1].label}`:''}`
+                        {m.scale<=7
+                          ?hintLabels.map(l=>`${l.value}=${l.label}`).join(' · ')
+                          :`${m.labels[0]?.label?`${m.scaleStart}=${m.labels[0].label}`:''}${m.labels[m.labels.length-1]?.label?` · ${m.scaleEnd}=${m.labels[m.labels.length-1].label}`:''}`
                         }
                       </div>
                     )}
@@ -957,7 +984,8 @@ export default function Annotate() {
                             className={`score-btn${isSelected?' selected':''}`}
                             style={color?{background:color.bg,borderColor:color.border,color:color.text}:{}}
                             onClick={()=>setScore(m.id,l.value)}>
-                            {l.value}{l.label&&m.scale<=5?<><br/><span style={{fontSize:'9px',fontWeight:400}}>{l.label}</span></>:''}
+                            {l.value}
+                            {l.label&&m.scale<=5?<><br/><span style={{fontSize:'9px',fontWeight:400}}>{l.label}</span></>:''}
                           </button>
                         );
                       })}
@@ -966,10 +994,13 @@ export default function Annotate() {
                 );
               })}
 
-              <div className="notes-wrap">
-                <span className="notes-label">Notes / Comments (optional)</span>
-                <textarea className="notes-field" placeholder="Any additional observations…" value={notes[currentIdx]||''} onChange={e=>saveNote(e.target.value)}/>
-              </div>
+              {includeNotes&&(
+                <div className="notes-wrap">
+                  <span className="notes-label">Annotator notes <span style={{color:'var(--text-faint)',fontStyle:'italic',fontWeight:400}}>(optional)</span></span>
+                  <textarea className="notes-field" placeholder="Any additional observations — leave empty to skip…"
+                    value={notes[currentIdx]||''} onChange={e=>saveNote(e.target.value)}/>
+                </div>
+              )}
             </div>
           </div>
         </div>
