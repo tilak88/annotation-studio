@@ -251,6 +251,8 @@ export default function Annotate() {
     });
   },[]);
 
+  const [xlsxReady, setXlsxReady] = useState(false);
+
   useEffect(() => {
     if (document.getElementById('katex-css')) return;
     const link=document.createElement('link');
@@ -265,9 +267,15 @@ export default function Annotate() {
       document.head.appendChild(s2);
     };
     document.head.appendChild(s1);
-    const s3=document.createElement('script');
-    s3.src='https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
-    document.head.appendChild(s3);
+    if (!document.getElementById('sheetjs-script')) {
+      const s3=document.createElement('script');
+      s3.id='sheetjs-script';
+      s3.src='https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
+      s3.onload=()=>setXlsxReady(true);
+      document.head.appendChild(s3);
+    } else {
+      if (window.XLSX) setXlsxReady(true);
+    }
   },[]);
 
   useEffect(() => {
@@ -331,7 +339,15 @@ export default function Annotate() {
     reader.onload=e=>{
       try {
         const XLSX=window.XLSX;
-        if (!XLSX) {setUploadError('File parser still loading, please try again in a second.');return;}
+        if (!XLSX) {
+          setUploadError('');
+          const retry=()=>{
+            if (window.XLSX) { setXlsxReady(true); handleFile(file); }
+            else setTimeout(retry,500);
+          };
+          retry();
+          return;
+        }
         const wb=XLSX.read(e.target.result,{type:'array'});
         const ws=wb.Sheets[wb.SheetNames[0]];
         const raw2D=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
@@ -601,12 +617,16 @@ export default function Annotate() {
         .scale-select:focus{border-color:var(--accent)}
         .scale-input{width:64px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 8px;outline:none;text-align:center}
         .scale-input:focus{border-color:var(--accent)}
-        .metric-labels-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px}
+        .metric-labels-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
         .label-wrap{display:flex;align-items:center;gap:6px}
-        .label-num{font-family:var(--mono);font-size:11px;color:var(--accent);width:22px;flex-shrink:0;text-align:right}
-        .label-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:12px;padding:5px 8px;outline:none;transition:border-color .15s}
+        .label-num{font-family:var(--mono);font-size:11px;color:var(--accent);width:22px;flex-shrink:0;text-align:right;font-weight:600}
+        .label-input-wrap{flex:1;position:relative;display:flex;align-items:center}
+        .label-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:6px 26px 6px 9px;outline:none;transition:border-color .15s,background .15s;min-width:0;width:100%}
+        .label-input:hover{border-color:rgba(79,142,247,.4);background:rgba(79,142,247,.04)}
         .label-input:focus{border-color:var(--accent);background:var(--surface2)}
         .label-input::placeholder{color:var(--text-faint);font-style:italic}
+        .label-pencil{position:absolute;right:7px;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:12px;pointer-events:none;transition:color .15s}
+        .label-input:hover~.label-pencil,.label-input:focus~.label-pencil{color:var(--accent)}
         .label-minmax{display:grid;grid-template-columns:1fr 1fr;gap:8px}
         .metric-remove{position:absolute;top:12px;right:12px;background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:18px;line-height:1;padding:2px 5px;border-radius:4px}
         .metric-remove:hover{color:var(--red);background:rgba(242,94,94,.08)}
@@ -655,10 +675,14 @@ export default function Annotate() {
         #left-panel{padding:20px 16px 40px 20px;overflow-y:auto;border-right:1px solid var(--border)}
         #right-panel{position:sticky;top:calc(var(--topbar-h) + 44px);height:calc(100vh - var(--topbar-h) - 44px);overflow-y:auto;background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--border) transparent}
         .content-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
-        .tab-bar{display:flex;align-items:center;background:var(--surface2);border-bottom:1px solid var(--border);overflow-x:auto}
+        .content-card-header{display:flex;align-items:stretch;background:var(--surface2);border-bottom:1px solid var(--border);min-height:38px}
+        .tab-bar{display:flex;align-items:center;flex:1;overflow-x:auto}
+        .stacked-bar{display:flex;align-items:center;flex:1}
         .tab-btn{padding:9px 16px;font-size:12px;font-family:var(--mono);color:var(--text-dim);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;flex-shrink:0}
         .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
         .tab-btn:hover{color:var(--text)}
+        .layout-toggle-btn{display:flex;align-items:center;gap:5px;padding:0 14px;font-size:11px;font-family:var(--mono);color:var(--text-dim);cursor:pointer;border:none;background:transparent;border-left:1px solid var(--border);white-space:nowrap;transition:all .15s;flex-shrink:0}
+        .layout-toggle-btn:hover{color:var(--accent);background:rgba(79,142,247,.06)}
         .layout-toggle{margin-left:auto;padding:6px 10px;font-size:10px;font-family:var(--mono);color:var(--text-faint);cursor:pointer;border:none;background:transparent;border-left:1px solid var(--border);white-space:nowrap;flex-shrink:0}
         .layout-toggle:hover{color:var(--accent)}
         .card-body{padding:18px 20px;font-size:14.5px;line-height:1.9;color:#d4daf4}
@@ -828,15 +852,18 @@ export default function Annotate() {
                       </>
                     )}
                   </div>
-                  <div className="labels-hint">✎ Click any label below to edit it</div>
+                  <div className="labels-section">
                   {showIndividual?(
                     <div className="metric-labels-grid">
                       {m.labels.map((l,i)=>(
                         <div key={i} className="label-wrap">
                           <span className="label-num">{l.value}</span>
-                          <input className="label-input" value={l.label}
-                            onChange={e=>updateLabel(m.id,i,e.target.value)}
-                            placeholder={`Score ${l.value} meaning…`}/>
+                          <div className="label-input-wrap">
+                            <input className="label-input" value={l.label}
+                              onChange={e=>updateLabel(m.id,i,e.target.value)}
+                              placeholder={`Score ${l.value}…`}/>
+                            <span className="label-pencil">✎</span>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -844,16 +871,23 @@ export default function Annotate() {
                     <div className="label-minmax">
                       <div className="label-wrap">
                         <span className="label-num">{m.scaleStart}</span>
-                        <input className="label-input" value={m.labels[0]?.label||''}
-                          onChange={e=>updateLabel(m.id,0,e.target.value)} placeholder="Min label"/>
+                        <div className="label-input-wrap">
+                          <input className="label-input" value={m.labels[0]?.label||''}
+                            onChange={e=>updateLabel(m.id,0,e.target.value)} placeholder="Min label…"/>
+                          <span className="label-pencil">✎</span>
+                        </div>
                       </div>
                       <div className="label-wrap">
                         <span className="label-num">{m.scaleEnd}</span>
-                        <input className="label-input" value={m.labels[m.labels.length-1]?.label||''}
-                          onChange={e=>updateLabel(m.id,m.labels.length-1,e.target.value)} placeholder="Max label"/>
+                        <div className="label-input-wrap">
+                          <input className="label-input" value={m.labels[m.labels.length-1]?.label||''}
+                            onChange={e=>updateLabel(m.id,m.labels.length-1,e.target.value)} placeholder="Max label…"/>
+                          <span className="label-pencil">✎</span>
+                        </div>
                       </div>
                     </div>
                   )}
+                  </div>
                 </div>
               );
             })}
@@ -911,28 +945,37 @@ export default function Annotate() {
           <div id="split-wrap">
             <div id="left-panel" ref={leftPanelRef}>
               <div className="content-card">
-                {layoutMode==='tabs'?(
-                  <>
+                <div className="content-card-header">
+                  {layoutMode==='tabs'?(
                     <div className="tab-bar">
                       {validDisplayCols.map((col,i)=>(
                         <button key={col} className={`tab-btn${activeTab===i?' active':''}`}
                           onClick={()=>setActiveTab(i)}>{col}</button>
                       ))}
-                      {validDisplayCols.length>1&&(
-                        <button className="layout-toggle" onClick={()=>setLayoutMode('stacked')}>⊟ Stack all</button>
-                      )}
                     </div>
-                    <div className="card-body"
-                      ref={el=>contentRefs.current[0]=el}
-                      dangerouslySetInnerHTML={{__html:renderMD(row[validDisplayCols[activeTab]]||'')}}/>
-                  </>
+                  ):(
+                    <div className="stacked-bar">
+                      <span style={{fontSize:'11px',fontFamily:'var(--mono)',color:'var(--text-dim)',padding:'0 14px'}}>All columns</span>
+                    </div>
+                  )}
+                  {validDisplayCols.length>1&&(
+                    <button className="layout-toggle-btn"
+                      onClick={()=>setLayoutMode(m=>m==='tabs'?'stacked':'tabs')}
+                      title={layoutMode==='tabs'?'Switch to stacked view':'Switch to tab view'}>
+                      {layoutMode==='tabs'?'⊟ Stack':'⊡ Tabs'}
+                    </button>
+                  )}
+                </div>
+                {layoutMode==='tabs'?(
+                  <div className="card-body"
+                    ref={el=>contentRefs.current[0]=el}
+                    dangerouslySetInnerHTML={{__html:renderMD(row[validDisplayCols[activeTab]]||'')}}/>
                 ):(
                   <>
                     {validDisplayCols.map((col,i)=>(
                       <div key={col}>
                         <div className="stacked-head">
                           <span className="stacked-col-name">{col}</span>
-                          {i===0&&<button className="layout-toggle" style={{marginLeft:'auto',borderLeft:'none'}} onClick={()=>setLayoutMode('tabs')}>⊡ Tab view</button>}
                         </div>
                         <div className="card-body" ref={el=>contentRefs.current[i]=el}
                           dangerouslySetInnerHTML={{__html:renderMD(row[col]||'')}}/>
