@@ -722,8 +722,8 @@ export default function Annotate() {
         .score-dim:last-child{border-bottom:none}
         .score-dim-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
         .score-dim-hint{font-size:11px;color:var(--text-dim);margin-bottom:8px;font-style:italic;line-height:1.5}
-        .btn-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:5px;width:100%;align-items:stretch}
-        .score-btn{border:1.5px solid var(--border);background:transparent;border-radius:6px;padding:0;height:52px;font-size:11px;font-family:var(--mono);font-weight:600;cursor:pointer;color:var(--text-dim);transition:all .13s;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%}
+        .btn-row{display:flex;flex-wrap:nowrap;gap:5px;width:100%}
+        .score-btn{border:1.5px solid var(--border);background:transparent;border-radius:6px;padding:10px 4px;flex:1;font-size:13px;font-family:var(--mono);font-weight:600;cursor:pointer;color:var(--text-dim);transition:all .13s;text-align:center;height:44px;display:flex;align-items:center;justify-content:center;min-width:0}
         .score-btn:hover{border-color:var(--accent);color:var(--text);transform:translateY(-1px)}
         .score-btn.selected{transform:translateY(-1px)}
         .notes-wrap{padding:12px 16px;border-top:1px solid var(--border);background:var(--surface)}
@@ -1006,12 +1006,21 @@ export default function Annotate() {
                       ?<span className="score-done-badge">✓ Complete</span>
                       :`${answeredCount} / ${metrics.length}`}
                   </span>
-                  <label style={{display:'flex',alignItems:'center',gap:'5px',cursor:'pointer'}} title="Auto-scroll to next unanswered metric after scoring">
-                    <span style={{fontSize:'10px',fontFamily:'var(--mono)',color:'var(--text-faint)'}}>Auto-scroll</span>
-                    <label className="toggle-switch" style={{width:'28px',height:'16px',flexShrink:0}}>
-                      <input type="checkbox" checked={autoAdvance} onChange={e=>setAutoAdvance(e.target.checked)}/>
-                      <span className="toggle-slider"></span>
-                    </label>
+                  <label style={{display:'flex',alignItems:'center',gap:'6px',cursor:'pointer'}} title="Auto-scroll to next unanswered metric after scoring">
+                    <span style={{fontSize:'10px',fontFamily:'var(--mono)',color:'var(--text-faint)',letterSpacing:'.05em'}}>Auto-scroll</span>
+                    <div style={{position:'relative',width:'28px',height:'16px',flexShrink:0}}>
+                      <input type="checkbox" checked={autoAdvance} onChange={e=>setAutoAdvance(e.target.checked)}
+                        style={{opacity:0,width:0,height:0,position:'absolute'}}/>
+                      <div onClick={()=>setAutoAdvance(v=>!v)} style={{
+                        position:'absolute',inset:0,borderRadius:'99px',cursor:'pointer',transition:'.2s',
+                        background:autoAdvance?'#4f8ef7':'#2a3050',
+                      }}>
+                        <div style={{
+                          position:'absolute',width:'10px',height:'10px',borderRadius:'50%',background:'white',
+                          top:'3px',left:autoAdvance?'15px':'3px',transition:'.2s',
+                        }}/>
+                      </div>
+                    </div>
                   </label>
                 </div>
               </div>
@@ -1041,7 +1050,6 @@ export default function Annotate() {
                             style={color?{background:color.bg,borderColor:color.border,color:color.text}:{}}
                             onClick={()=>setScore(m.id,l.value)}>
                             {l.value}
-                            {l.label&&m.scale<=5?<span style={{fontSize:'9px',fontWeight:400,lineHeight:1.2,maxWidth:'100%',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',display:'block',padding:'0 2px'}}>{l.label}</span>:''}
                           </button>
                         );
                       })}
