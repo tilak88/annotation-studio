@@ -469,6 +469,8 @@ export default function Annotate() {
 
   function countDone(){return sheetData.filter((_,i)=>isScored(i)).length;}
 
+  const metricRefs = useRef({});
+
   function setScore(metricId,val) {
     const cur=scores[currentIdx]?.[metricId];
     const newVal=cur===val?null:val;
@@ -477,12 +479,15 @@ export default function Annotate() {
     setScores(next);
     persist(next,notes);
     if (autoAdvance&&newVal!==null) {
-      const allDone=metrics.every(m=>{
+      const currentMetricIdx=metrics.findIndex(m=>m.id===metricId);
+      const nextUnanswered=metrics.slice(currentMetricIdx+1).find(m=>{
         const v=next[currentIdx]?.[m.id];
-        return v!==undefined&&v!==null&&v!=='';
+        return v===undefined||v===null||v==='';
       });
-      if (allDone&&currentIdx<sheetData.length-1) {
-        setTimeout(()=>setCurrentIdx(i=>i+1),300);
+      if (nextUnanswered&&metricRefs.current[nextUnanswered.id]) {
+        setTimeout(()=>{
+          metricRefs.current[nextUnanswered.id]?.scrollIntoView({behavior:'smooth',block:'nearest'});
+        },150);
       }
     }
   }
@@ -658,7 +663,6 @@ export default function Annotate() {
         .save-indicator{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text-faint)}
         .save-dot{width:7px;height:7px;border-radius:50%;background:var(--text-faint);transition:background .3s,box-shadow .3s;flex-shrink:0}
         .save-dot.flash{background:var(--green);box-shadow:0 0 8px var(--green)}
-        .auto-advance-wrap{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);white-space:nowrap}
         .btn-export{display:flex;align-items:center;gap:7px;padding:8px 14px;background:var(--green);color:#000;font-family:var(--sans);font-size:12px;font-weight:700;border:none;border-radius:7px;cursor:pointer;transition:background .15s;white-space:nowrap}
         .btn-export:hover{background:#2ebc5c}
         .btn-export.incomplete{background:var(--amber)}
@@ -922,13 +926,6 @@ export default function Annotate() {
                 <div className={`save-dot${saveFlash?' flash':''}`}></div>
                 {saveBadge||'not saved yet'}
               </div>
-              <div className="auto-advance-wrap">
-                <label className="toggle-switch" style={{width:'28px',height:'16px'}}>
-                  <input type="checkbox" checked={autoAdvance} onChange={e=>setAutoAdvance(e.target.checked)}/>
-                  <span className="toggle-slider" style={{borderRadius:'99px'}}></span>
-                </label>
-                Auto-advance
-              </div>
               <button className={`btn-export${done<total?' incomplete':''}`} onClick={exportXLSX}>⬇ Export</button>
               <button className="btn-signout" onClick={signOut}>Sign out</button>
             </div>
@@ -996,11 +993,20 @@ export default function Annotate() {
             <div id="right-panel">
               <div id="score-panel-head">
                 <h2>Scoring Panel</h2>
-                <span className="score-completion">
-                  {answeredCount===metrics.length
-                    ?<span className="score-done-badge">✓ Complete</span>
-                    :`${answeredCount} / ${metrics.length} answered`}
-                </span>
+                <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+                  <span className="score-completion">
+                    {answeredCount===metrics.length
+                      ?<span className="score-done-badge">✓ Complete</span>
+                      :`${answeredCount} / ${metrics.length}`}
+                  </span>
+                  <label style={{display:'flex',alignItems:'center',gap:'5px',cursor:'pointer'}} title="Auto-scroll to next unanswered metric after scoring">
+                    <span style={{fontSize:'10px',fontFamily:'var(--mono)',color:'var(--text-faint)'}}>Auto-scroll</span>
+                    <label className="toggle-switch" style={{width:'28px',height:'16px',flexShrink:0}}>
+                      <input type="checkbox" checked={autoAdvance} onChange={e=>setAutoAdvance(e.target.checked)}/>
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </label>
+                </div>
               </div>
 
               {metrics.map((m)=>{
@@ -1008,7 +1014,7 @@ export default function Annotate() {
                 const hasVal=cur!==undefined&&cur!==null&&cur!=='';
                 const hintLabels=m.labels.filter(l=>l.label);
                 return (
-                  <div key={m.id} className="score-dim">
+                  <div key={m.id} className="score-dim" ref={el=>metricRefs.current[m.id]=el}>
                     <div className="score-dim-name">{m.name}</div>
                     {hintLabels.length>0&&(
                       <div className="score-dim-hint">
