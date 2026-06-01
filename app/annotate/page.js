@@ -722,8 +722,8 @@ export default function Annotate() {
         .score-dim:last-child{border-bottom:none}
         .score-dim-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
         .score-dim-hint{font-size:11px;color:var(--text-dim);margin-bottom:8px;font-style:italic;line-height:1.5}
-        .btn-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:5px;width:100%}
-        .score-btn{border:1.5px solid var(--border);background:transparent;border-radius:6px;padding:7px 4px;font-size:11px;font-family:var(--mono);font-weight:600;cursor:pointer;color:var(--text-dim);transition:all .13s;text-align:center;line-height:1.3;width:100%}
+        .btn-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:5px;width:100%;align-items:stretch}
+        .score-btn{border:1.5px solid var(--border);background:transparent;border-radius:6px;padding:0;height:52px;font-size:11px;font-family:var(--mono);font-weight:600;cursor:pointer;color:var(--text-dim);transition:all .13s;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%}
         .score-btn:hover{border-color:var(--accent);color:var(--text);transform:translateY(-1px)}
         .score-btn.selected{transform:translateY(-1px)}
         .notes-wrap{padding:12px 16px;border-top:1px solid var(--border);background:var(--surface)}
@@ -1041,7 +1041,7 @@ export default function Annotate() {
                             style={color?{background:color.bg,borderColor:color.border,color:color.text}:{}}
                             onClick={()=>setScore(m.id,l.value)}>
                             {l.value}
-                            {l.label&&m.scale<=5?<><br/><span style={{fontSize:'9px',fontWeight:400}}>{l.label}</span></>:''}
+                            {l.label&&m.scale<=5?<span style={{fontSize:'9px',fontWeight:400,lineHeight:1.2,maxWidth:'100%',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',display:'block',padding:'0 2px'}}>{l.label}</span>:''}
                           </button>
                         );
                       })}
