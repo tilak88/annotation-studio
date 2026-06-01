@@ -470,6 +470,7 @@ export default function Annotate() {
   function countDone(){return sheetData.filter((_,i)=>isScored(i)).length;}
 
   const metricRefs = useRef({});
+  const rightPanelRef = useRef(null);
 
   function setScore(metricId,val) {
     const cur=scores[currentIdx]?.[metricId];
@@ -484,9 +485,15 @@ export default function Annotate() {
         const v=next[currentIdx]?.[m.id];
         return v===undefined||v===null||v==='';
       });
-      if (nextUnanswered&&metricRefs.current[nextUnanswered.id]) {
+      if (nextUnanswered&&metricRefs.current[nextUnanswered.id]&&rightPanelRef.current) {
         setTimeout(()=>{
-          metricRefs.current[nextUnanswered.id]?.scrollIntoView({behavior:'smooth',block:'nearest'});
+          const panel=rightPanelRef.current;
+          const el=metricRefs.current[nextUnanswered.id];
+          if (panel&&el) {
+            const panelTop=panel.getBoundingClientRect().top;
+            const elTop=el.getBoundingClientRect().top;
+            panel.scrollBy({top:elTop-panelTop-20,behavior:'smooth'});
+          }
         },150);
       }
     }
@@ -715,8 +722,8 @@ export default function Annotate() {
         .score-dim:last-child{border-bottom:none}
         .score-dim-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
         .score-dim-hint{font-size:11px;color:var(--text-dim);margin-bottom:8px;font-style:italic;line-height:1.5}
-        .btn-row{display:flex;flex-wrap:wrap;gap:5px}
-        .score-btn{border:1.5px solid var(--border);background:transparent;border-radius:6px;padding:7px 8px;min-width:44px;font-size:11.5px;font-family:var(--mono);font-weight:600;cursor:pointer;color:var(--text-dim);transition:all .13s;text-align:center;line-height:1.3}
+        .btn-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:5px;width:100%}
+        .score-btn{border:1.5px solid var(--border);background:transparent;border-radius:6px;padding:7px 4px;font-size:11px;font-family:var(--mono);font-weight:600;cursor:pointer;color:var(--text-dim);transition:all .13s;text-align:center;line-height:1.3;width:100%}
         .score-btn:hover{border-color:var(--accent);color:var(--text);transform:translateY(-1px)}
         .score-btn.selected{transform:translateY(-1px)}
         .notes-wrap{padding:12px 16px;border-top:1px solid var(--border);background:var(--surface)}
@@ -990,7 +997,7 @@ export default function Annotate() {
               </div>
             </div>
 
-            <div id="right-panel">
+            <div id="right-panel" ref={rightPanelRef}>
               <div id="score-panel-head">
                 <h2>Scoring Panel</h2>
                 <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
