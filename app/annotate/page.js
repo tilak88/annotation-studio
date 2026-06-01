@@ -1008,17 +1008,11 @@ export default function Annotate() {
             <div id="right-panel" ref={rightPanelRef}>
               <div id="score-panel-head">
                 <h2>Scoring Panel</h2>
-                <div className="panel-head-right">
-                  <span className="score-completion">
-                    {answeredCount===metrics.length
-                      ?<span className="score-done-badge">✓ Complete</span>
-                      :`${answeredCount} / ${metrics.length}`}
-                  </span>
-                  <label style={{display:'flex',alignItems:'center',gap:'5px',cursor:'pointer'}}>
-                    <input type="checkbox" checked={autoAdvance} onChange={e=>setAutoAdvance(e.target.checked)} style={{width:'13px',height:'13px',accentColor:'#4f8ef7',cursor:'pointer'}}/>
-                    <span style={{fontSize:'10px',fontFamily:'var(--mono)',color:'var(--text-faint)'}}>Auto-scroll</span>
-                  </label>
-                </div>
+                <span className="score-completion">
+                  {answeredCount===metrics.length
+                    ?<span className="score-done-badge">✓ Complete</span>
+                    :`${answeredCount} / ${metrics.length}`}
+                </span>
               </div>
 
               {metrics.map((m)=>{
