@@ -715,9 +715,17 @@ export default function Annotate() {
         .nav-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
         .nav-btn.primary:hover{background:#3a7aec}
         #nav-center{font-family:var(--mono);font-size:12px;color:var(--text-dim);text-align:center}
-        #score-panel-head{background:var(--surface2);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-        #score-panel-head h2{font-size:11px;font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim)}
-        .score-completion{font-family:var(--mono);font-size:11px;color:var(--text-faint)}
+        #score-panel-head{background:var(--surface2);padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;gap:8px}
+        #score-panel-head h2{font-size:11px;font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);white-space:nowrap}
+        .panel-head-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+        .auto-scroll-toggle{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none}
+        .auto-scroll-toggle span{font-size:10px;font-family:var(--mono);color:var(--text-faint);white-space:nowrap}
+        .mini-toggle{width:30px;height:17px;border-radius:99px;border:none;outline:none;cursor:pointer;transition:background .2s;position:relative;flex-shrink:0}
+        .mini-toggle::after{content:'';position:absolute;width:11px;height:11px;border-radius:50%;background:white;top:3px;transition:left .2s}
+        .mini-toggle.on{background:#4f8ef7}
+        .mini-toggle.on::after{left:16px}
+        .mini-toggle.off{background:#2a3050}
+        .mini-toggle.off::after{left:3px}
         .score-dim{padding:12px 16px;border-bottom:1px solid var(--border)}
         .score-dim:last-child{border-bottom:none}
         .score-dim-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
@@ -1000,27 +1008,15 @@ export default function Annotate() {
             <div id="right-panel" ref={rightPanelRef}>
               <div id="score-panel-head">
                 <h2>Scoring Panel</h2>
-                <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+                <div className="panel-head-right">
                   <span className="score-completion">
                     {answeredCount===metrics.length
                       ?<span className="score-done-badge">✓ Complete</span>
                       :`${answeredCount} / ${metrics.length}`}
                   </span>
-                  <label style={{display:'flex',alignItems:'center',gap:'6px',cursor:'pointer'}} title="Auto-scroll to next unanswered metric after scoring">
-                    <span style={{fontSize:'10px',fontFamily:'var(--mono)',color:'var(--text-faint)',letterSpacing:'.05em'}}>Auto-scroll</span>
-                    <div style={{position:'relative',width:'28px',height:'16px',flexShrink:0}}>
-                      <input type="checkbox" checked={autoAdvance} onChange={e=>setAutoAdvance(e.target.checked)}
-                        style={{opacity:0,width:0,height:0,position:'absolute'}}/>
-                      <div onClick={()=>setAutoAdvance(v=>!v)} style={{
-                        position:'absolute',inset:0,borderRadius:'99px',cursor:'pointer',transition:'.2s',
-                        background:autoAdvance?'#4f8ef7':'#2a3050',
-                      }}>
-                        <div style={{
-                          position:'absolute',width:'10px',height:'10px',borderRadius:'50%',background:'white',
-                          top:'3px',left:autoAdvance?'15px':'3px',transition:'.2s',
-                        }}/>
-                      </div>
-                    </div>
+                  <label style={{display:'flex',alignItems:'center',gap:'5px',cursor:'pointer'}}>
+                    <input type="checkbox" checked={autoAdvance} onChange={e=>setAutoAdvance(e.target.checked)} style={{width:'13px',height:'13px',accentColor:'#4f8ef7',cursor:'pointer'}}/>
+                    <span style={{fontSize:'10px',fontFamily:'var(--mono)',color:'var(--text-faint)'}}>Auto-scroll</span>
                   </label>
                 </div>
               </div>
